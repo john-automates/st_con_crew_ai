@@ -5,10 +5,26 @@ from crewai_tools import tool
 
 # Initialize API keys
 shodan_api_key = os.getenv('SHODAN_API_KEY')
-portscanner_api_key = os.getenv('PORTSCANNER_API_KEY')
 
 # Initialize Shodan client
 shodan_client = shodan.Shodan(shodan_api_key)
+
+# Common ports and their usual services
+common_ports_services = {
+    21: "FTP",
+    22: "SSH",
+    23: "Telnet",
+    25: "SMTP",
+    53: "DNS",
+    80: "HTTP",
+    110: "POP3",
+    143: "IMAP",
+    443: "HTTPS",
+    3306: "MySQL",
+    3389: "RDP",
+    5900: "VNC",
+    8080: "HTTP Proxy"
+}
 
 def get_ip_info(ip_address: str) -> str:
     """
@@ -39,40 +55,30 @@ def get_ip_info(ip_address: str) -> str:
 
 def scan_ports(ip_address: str) -> str:
     """
-    Scan ports of the specified IP address using Port Scanner Online.
+    Scan ports of the specified IP address using Shodan.
     """
-    url = "https://api.portscanner.online/v01/start_scan"
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "PORTSCANNER-API-KEY": portscanner_api_key
-    }
-    data = {
-        "command": "simple",
-        "target": ip_address
-    }
-    
     try:
-        response = requests.post(url, headers=headers, data=data)
-        response.raise_for_status()
-        scan_id = response.json().get("scan_id")
+        results = shodan_client.host(ip_address)
         
-        # Wait for scan to complete
-        status_url = "https://api.portscanner.online/v01/check_scan_status"
-        status_data = {"scan_id": scan_id}
-        while True:
-            status_response = requests.post(status_url, headers=headers, data=status_data)
-            status_response.raise_for_status()
-            if status_response.json().get("scan_status") == "Finished":
-                break
-        
-        # Get scan results
-        result_url = "https://api.portscanner.online/v01/scan_result"
-        result_data = {"scan_id": scan_id}
-        result_response = requests.post(result_url, headers=headers, data=result_data)
-        result_response.raise_for_status()
-        
-        scan_result = result_response.json().get("result", "No result available")
-        return f"Port scan results for {ip_address}:\n{scan_result}"
+        open_ports = results.get('ports', [])
+        if open_ports:
+            port_details = []
+            for service in results['data']:
+                port = service['port']
+                product = service.get('product', 'N/A')
+                version = service.get('version', 'N/A')
+                data = service['data']
+                port_details.append(
+                    f"Port: {port}\nService: {product}\nVersion: {version}\nData: {data}\n{'-' * 60}"
+                )
+            port_guesses = [f"{port}: {common_ports_services.get(port, 'Unknown')}" for port in open_ports]
+            return (
+                f"Open ports for {ip_address}: {', '.join(port_guesses)}\n"
+                f"This is MY BEST GUESS for what services usually run on these ports.\n\n"
+                f"Detailed service information:\n{''.join(port_details)}"
+            )
+        else:
+            return f"No open ports found for {ip_address}"
     except Exception as e:
         return f"An error occurred while scanning ports for {ip_address}: {str(e)}"
 

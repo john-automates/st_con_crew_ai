@@ -1,6 +1,10 @@
+import logging
 from crewai import Agent
 from ip_researcher_tools import get_ip_info_tool, scan_ports_tool, get_associated_urls_tool
 from domain_researcher_tools import scrape_and_summarize_tool
+
+# Configure logging for agents
+logger = logging.getLogger('agents')
 
 ip_researcher = Agent(
     role='IP Address Researcher',
@@ -11,7 +15,8 @@ ip_researcher = Agent(
         "You specialize in IP address analysis, checking for malicious activities, open ports, reputation, geolocation, "
         "and associated domains or URLs."
     ),
-    tools=[get_ip_info_tool, scan_ports_tool, get_associated_urls_tool]
+    tools=[get_ip_info_tool, scan_ports_tool, get_associated_urls_tool],
+    logger=logger
 )
 
 domain_researcher = Agent(
@@ -23,7 +28,8 @@ domain_researcher = Agent(
         "You are an expert in domain research, analyzing WHOIS, DNS records, historical data for signs of compromise, "
         "and summarizing website content to understand its purpose and potential risks."
     ),
-    tools=[scrape_and_summarize_tool]
+    tools=[scrape_and_summarize_tool],
+    logger=logger
 )
 
 url_researcher = Agent(
@@ -34,7 +40,8 @@ url_researcher = Agent(
     backstory=(
         "Your expertise is in investigating URLs for phishing, malware distribution, and other malicious activities."
     ),
-    tools=[scrape_and_summarize_tool]
+    tools=[scrape_and_summarize_tool],
+    logger=logger
 )
 
 manager_agent = Agent(
@@ -46,5 +53,6 @@ manager_agent = Agent(
         "As the Cybersecurity Research Manager, you coordinate the research activities of specialized agents, "
         "delegate tasks, and compile their findings to provide a comprehensive threat analysis."
     ),
-    tools=[]
+    tools=[],
+    logger=logger
 )

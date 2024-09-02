@@ -1,10 +1,14 @@
 import os
+import requests
 from crewai_tools import tool
 from firecrawl import FirecrawlApp
 
 # Initialize Firecrawl client
 firecrawl_api_key = os.getenv('FIRECRAWL_API_KEY')
 firecrawl_client = FirecrawlApp(api_key=firecrawl_api_key)
+
+# Initialize VirusTotal API key
+virustotal_api_key = os.getenv('VIRUSTOTAL_API_KEY')
 
 def scrape_and_summarize(domain: str) -> str:
     """
@@ -56,5 +60,30 @@ def extract_keywords(text):
     
     return [word for word, freq in sorted_words]
 
-# Create Tool object for use in the main application
+def get_virustotal_report(url: str) -> str:
+    """
+    Get the URL analysis report from VirusTotal.
+    """
+    try:
+        headers = {
+            "x-apikey": virustotal_api_key
+        }
+        params = {
+            "url": url
+        }
+        response = requests.post("https://www.virustotal.com/api/v3/urls", headers=headers, params=params)
+        response.raise_for_status()
+        analysis_id = response.json()["data"]["id"]
+        
+        # Get the analysis report
+        report_response = requests.get(f"https://www.virustotal.com/api/v3/analyses/{analysis_id}", headers=headers)
+        report_response.raise_for_status()
+        report = report_response.json()
+        
+        return f"VirusTotal URL analysis report for {url}:\n{report}"
+    except Exception as e:
+        return f"An error occurred while retrieving the VirusTotal report for {url}: {str(e)}"
+
+# Create Tool objects for use in the main application
 scrape_and_summarize_tool = tool("Scrape and Summarize Website")(scrape_and_summarize)
+get_virustotal_report_tool = tool("Get VirusTotal URL Report")(get_virustotal_report)
