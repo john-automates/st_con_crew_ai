@@ -1,0 +1,13 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+# Let's ignore all files but our python files
+*env
+*.pyc
+*.pyo
+*.pyd
+*.pyz
+*.pyw
+*.pyx
+*.pxd
+*.pxi
+*.pxd
+crewai-env

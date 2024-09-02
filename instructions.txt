@@ -1,0 +1,3 @@
+Let's develop the tools for the IP Address Researcher agent. Let's create a new file that is specific for their tools
+
+Let's use use shodan API to build tools for the AI agent to properly identify information about the IP address
