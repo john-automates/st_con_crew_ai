@@ -119,9 +119,9 @@ def cybersecurity_manager_converse(detection_info):
 if __name__ == "__main__":
     # Example input and execution
     detection_info_example = {
-        'ip_address': '188.114.96.3',
+        #'ip_address': '172.67.216.152',
         #'domain_name': 'example.com',
-        #'url': 'https://extendica.com'
+        'url': 'https://compi.dev/'
     }
 
     # Simulate the manager processing the input

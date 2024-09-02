@@ -38,10 +38,12 @@ def create_evaluation_task(initial_results, detection_info):
             description=f"Evaluate the research results for the following detection information: {detection_info}. "
                         f"Identify any domains or URLs that need further investigation, and compile a comprehensive threat analysis. "
                         f"Initial results: {initial_results}. "
-                        f"Evaluate open ports and website content to guess what the server is doing.",
+                        f"Evaluate open ports and website content to guess what the server is doing. "
+                        f"Include VirusTotal URL analysis report.",
             expected_output="Comprehensive threat analysis and list of additional domains or URLs to investigate, "
                             "focusing on the provided detection information. "
-                            "Include evaluation of open ports and website content to guess what the server is doing.",
+                            "Include evaluation of open ports and website content to guess what the server is doing. "
+                            "Include VirusTotal URL analysis report.",
             agent=manager_agent
         )
     return None
